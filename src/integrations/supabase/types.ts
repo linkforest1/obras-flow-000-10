@@ -25,6 +25,7 @@ export type Database = {
           end_date: string | null
           id: string
           location: string | null
+          pacote: string
           priority: string | null
           progress: number | null
           project_id: string
@@ -45,6 +46,7 @@ export type Database = {
           end_date?: string | null
           id?: string
           location?: string | null
+          pacote?: string
           priority?: string | null
           progress?: number | null
           project_id: string
@@ -65,6 +67,7 @@ export type Database = {
           end_date?: string | null
           id?: string
           location?: string | null
+          pacote?: string
           priority?: string | null
           progress?: number | null
           project_id?: string
@@ -90,6 +93,7 @@ export type Database = {
           activity_id: string
           assigned_at: string
           id: string
+          pacote: string
           role: string | null
           user_id: string
         }
@@ -97,6 +101,7 @@ export type Database = {
           activity_id: string
           assigned_at?: string
           id?: string
+          pacote?: string
           role?: string | null
           user_id: string
         }
@@ -104,6 +109,7 @@ export type Database = {
           activity_id?: string
           assigned_at?: string
           id?: string
+          pacote?: string
           role?: string | null
           user_id?: string
         }
@@ -123,6 +129,7 @@ export type Database = {
           comment_text: string
           created_at: string
           id: string
+          pacote: string
           user_id: string
         }
         Insert: {
@@ -130,6 +137,7 @@ export type Database = {
           comment_text: string
           created_at?: string
           id?: string
+          pacote?: string
           user_id: string
         }
         Update: {
@@ -137,6 +145,7 @@ export type Database = {
           comment_text?: string
           created_at?: string
           id?: string
+          pacote?: string
           user_id?: string
         }
         Relationships: [
@@ -162,6 +171,7 @@ export type Database = {
           caption: string | null
           created_at: string
           id: string
+          pacote: string
           photo_url: string
           user_id: string
         }
@@ -170,6 +180,7 @@ export type Database = {
           caption?: string | null
           created_at?: string
           id?: string
+          pacote?: string
           photo_url: string
           user_id: string
         }
@@ -178,6 +189,7 @@ export type Database = {
           caption?: string | null
           created_at?: string
           id?: string
+          pacote?: string
           photo_url?: string
           user_id?: string
         }
@@ -207,6 +219,7 @@ export type Database = {
           created_by: string
           description: string | null
           id: string
+          pacote: string
           title: string
         }
         Insert: {
@@ -217,6 +230,7 @@ export type Database = {
           created_by: string
           description?: string | null
           id?: string
+          pacote?: string
           title: string
         }
         Update: {
@@ -227,6 +241,7 @@ export type Database = {
           created_by?: string
           description?: string | null
           id?: string
+          pacote?: string
           title?: string
         }
         Relationships: [
@@ -244,6 +259,7 @@ export type Database = {
           activity_id: string
           created_at: string
           id: string
+          pacote: string
           quantity: number
           role: string
           updated_at: string
@@ -252,6 +268,7 @@ export type Database = {
           activity_id: string
           created_at?: string
           id?: string
+          pacote?: string
           quantity?: number
           role: string
           updated_at?: string
@@ -260,6 +277,7 @@ export type Database = {
           activity_id?: string
           created_at?: string
           id?: string
+          pacote?: string
           quantity?: number
           role?: string
           updated_at?: string
@@ -301,6 +319,7 @@ export type Database = {
           created_at: string
           daily_report_id: string
           id: string
+          pacote: string
           photo_url: string
         }
         Insert: {
@@ -308,6 +327,7 @@ export type Database = {
           created_at?: string
           daily_report_id: string
           id?: string
+          pacote?: string
           photo_url: string
         }
         Update: {
@@ -315,6 +335,7 @@ export type Database = {
           created_at?: string
           daily_report_id?: string
           id?: string
+          pacote?: string
           photo_url?: string
         }
         Relationships: [
@@ -335,6 +356,7 @@ export type Database = {
           description: string | null
           deviation_type: string | null
           id: string
+          pacote: string
           report_date: string
           responsible: string | null
           title: string
@@ -348,6 +370,7 @@ export type Database = {
           description?: string | null
           deviation_type?: string | null
           id?: string
+          pacote?: string
           report_date?: string
           responsible?: string | null
           title: string
@@ -361,6 +384,7 @@ export type Database = {
           description?: string | null
           deviation_type?: string | null
           id?: string
+          pacote?: string
           report_date?: string
           responsible?: string | null
           title?: string
@@ -407,6 +431,7 @@ export type Database = {
           email: string | null
           full_name: string | null
           id: string
+          pacote: string
           role: string | null
           updated_at: string
         }
@@ -415,6 +440,7 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id: string
+          pacote?: string
           role?: string | null
           updated_at?: string
         }
@@ -423,6 +449,7 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id?: string
+          pacote?: string
           role?: string | null
           updated_at?: string
         }
@@ -469,6 +496,7 @@ export type Database = {
           caption: string | null
           created_at: string
           id: string
+          pacote: string
           photo_url: string
           quality_report_id: string
         }
@@ -476,6 +504,7 @@ export type Database = {
           caption?: string | null
           created_at?: string
           id?: string
+          pacote?: string
           photo_url: string
           quality_report_id: string
         }
@@ -483,6 +512,7 @@ export type Database = {
           caption?: string | null
           created_at?: string
           id?: string
+          pacote?: string
           photo_url?: string
           quality_report_id?: string
         }
@@ -496,6 +526,7 @@ export type Database = {
           eixo: string | null
           elevacao: string | null
           id: string
+          pacote: string
           status: string
           tag_peca: string
           updated_at: string
@@ -508,6 +539,7 @@ export type Database = {
           eixo?: string | null
           elevacao?: string | null
           id?: string
+          pacote?: string
           status?: string
           tag_peca: string
           updated_at?: string
@@ -520,6 +552,7 @@ export type Database = {
           eixo?: string | null
           elevacao?: string | null
           id?: string
+          pacote?: string
           status?: string
           tag_peca?: string
           updated_at?: string
@@ -535,6 +568,7 @@ export type Database = {
           created_at: string
           date: string
           id: string
+          pacote: string
           updated_at: string
           user_id: string
         }
@@ -545,6 +579,7 @@ export type Database = {
           created_at?: string
           date?: string
           id?: string
+          pacote?: string
           updated_at?: string
           user_id: string
         }
@@ -555,6 +590,7 @@ export type Database = {
           created_at?: string
           date?: string
           id?: string
+          pacote?: string
           updated_at?: string
           user_id?: string
         }
@@ -573,6 +609,7 @@ export type Database = {
           caption: string | null
           created_at: string
           id: string
+          pacote: string
           photo_url: string
           rdo_entry_id: string
         }
@@ -580,6 +617,7 @@ export type Database = {
           caption?: string | null
           created_at?: string
           id?: string
+          pacote?: string
           photo_url: string
           rdo_entry_id: string
         }
@@ -587,6 +625,7 @@ export type Database = {
           caption?: string | null
           created_at?: string
           id?: string
+          pacote?: string
           photo_url?: string
           rdo_entry_id?: string
         }
@@ -776,6 +815,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_current_user_pacote: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       get_current_user_role: {
         Args: Record<PropertyKey, never>
         Returns: string
