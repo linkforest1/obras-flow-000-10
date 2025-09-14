@@ -3,7 +3,7 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, Plus, Building2, LogOut, Calendar, MapPin, Users as UsersIcon } from "lucide-react";
+import { Users, Plus, Building2, LogOut, Calendar, MapPin, Users as UsersIcon, Edit, Save, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { useState, useEffect } from "react";
@@ -13,6 +13,9 @@ import { ProjectCard } from "@/components/ProjectCard";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { BottomNavBar } from "@/components/BottomNavBar";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 const Team = () => {
   const { toast } = useToast();
@@ -20,10 +23,22 @@ const Team = () => {
   const [profile, setProfile] = useState<any>(null);
   const [projects, setProjects] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [profiles, setProfiles] = useState<any[]>([]);
+  const [editingProfile, setEditingProfile] = useState<string | null>(null);
+  const [editData, setEditData] = useState<any>({});
+
+  const pacoteOptions = [
+    { value: "Pacote 1", label: "Pacote 1" },
+    { value: "Pacote 2", label: "Pacote 2" },
+    { value: "Pacote 3", label: "Pacote 3" },
+    { value: "Pacote 4", label: "Pacote 4" },
+    { value: "Pacote 5", label: "Pacote 5" },
+  ];
 
   useEffect(() => {
     fetchProfile();
     fetchProjects();
+    fetchProfiles();
   }, [user]);
 
   const fetchProfile = async () => {
@@ -40,6 +55,24 @@ const Team = () => {
       } else {
         console.log('Profile fetched:', data);
         setProfile(data);
+      }
+    }
+  };
+
+  const fetchProfiles = async () => {
+    if (user && profile?.role === 'gestor') {
+      console.log('Fetching profiles for gestor');
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .in('role', ['fiscal', 'engenheiro'])
+        .order('full_name');
+      
+      if (error) {
+        console.error('Error fetching profiles:', error);
+      } else {
+        console.log('Profiles fetched:', data);
+        setProfiles(data || []);
       }
     }
   };
@@ -98,6 +131,50 @@ const Team = () => {
       setProjects(projectsWithMembers);
       setLoading(false);
     }
+  };
+
+  const handleEditProfile = (profileToEdit: any) => {
+    setEditingProfile(profileToEdit.id);
+    setEditData({
+      role: profileToEdit.role,
+      pacote: profileToEdit.pacote
+    });
+  };
+
+  const handleSaveProfile = async () => {
+    if (!editingProfile) return;
+
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          role: editData.role,
+          pacote: editData.pacote
+        })
+        .eq('id', editingProfile);
+
+      if (error) throw error;
+
+      toast({
+        title: "Perfil atualizado",
+        description: "As informações do perfil foram atualizadas com sucesso."
+      });
+
+      setEditingProfile(null);
+      setEditData({});
+      fetchProfiles();
+    } catch (error: any) {
+      toast({
+        title: "Erro",
+        description: "Erro ao atualizar perfil. Tente novamente.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingProfile(null);
+    setEditData({});
   };
 
   const handleSignOut = async () => {
@@ -202,6 +279,91 @@ const Team = () => {
                   <h2 className="text-xl font-semibold">Meus Projetos</h2>
                   <CreateProjectModal onProjectCreated={fetchProjects} />
                 </div>
+                
+                {/* Gestão de Perfis */}
+                {isGestor && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Users className="w-5 h-5" />
+                        Gerenciar Equipe
+                      </CardTitle>
+                      <CardDescription>
+                        Edite perfis e pacotes dos membros da equipe
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      {profiles.length > 0 ? (
+                        <div className="space-y-3">
+                          {profiles.map((profile) => (
+                            <div key={profile.id} className="flex items-center justify-between p-3 border rounded-lg">
+                              <div className="flex-1">
+                                <p className="font-medium">{profile.full_name}</p>
+                                <p className="text-sm text-muted-foreground">{profile.email}</p>
+                                {editingProfile === profile.id ? (
+                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2">
+                                    <div>
+                                      <Label className="text-xs">Função</Label>
+                                      <Select value={editData.role} onValueChange={(value) => setEditData({...editData, role: value})}>
+                                        <SelectTrigger className="h-8">
+                                          <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                          <SelectItem value="fiscal">Fiscal</SelectItem>
+                                          <SelectItem value="engenheiro">Engenheiro</SelectItem>
+                                        </SelectContent>
+                                      </Select>
+                                    </div>
+                                    <div>
+                                      <Label className="text-xs">Pacote</Label>
+                                      <Select value={editData.pacote} onValueChange={(value) => setEditData({...editData, pacote: value})}>
+                                        <SelectTrigger className="h-8">
+                                          <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                          {pacoteOptions.map(option => (
+                                            <SelectItem key={option.value} value={option.value}>
+                                              {option.label}
+                                            </SelectItem>
+                                          ))}
+                                        </SelectContent>
+                                      </Select>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <div className="flex gap-2 mt-1">
+                                    <Badge variant="outline">{profile.role}</Badge>
+                                    <Badge variant="secondary">{profile.pacote}</Badge>
+                                  </div>
+                                )}
+                              </div>
+                              <div className="flex items-center gap-2">
+                                {editingProfile === profile.id ? (
+                                  <>
+                                    <Button size="sm" onClick={handleSaveProfile} className="h-8">
+                                      <Save className="w-3 h-3" />
+                                    </Button>
+                                    <Button size="sm" variant="outline" onClick={handleCancelEdit} className="h-8">
+                                      <X className="w-3 h-3" />
+                                    </Button>
+                                  </>
+                                ) : (
+                                  <Button size="sm" variant="outline" onClick={() => handleEditProfile(profile)} className="h-8">
+                                    <Edit className="w-3 h-3" />
+                                  </Button>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-center text-muted-foreground py-4">
+                          Nenhum perfil de fiscal ou engenheiro encontrado
+                        </p>
+                      )}
+                    </CardContent>
+                  </Card>
+                )}
                 
                 {/* Desktop List View / Mobile Grid View */}
                 <div className="md:space-y-4 grid gap-6 md:gap-0 md:grid-cols-1 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 md:lg:grid-cols-1">

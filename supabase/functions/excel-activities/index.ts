@@ -73,24 +73,24 @@ async function handleDownloadTemplate() {
     const modelHeaders = [
       "ID da Atividade", "Titulo", "Descricao", "Disciplina", "Nome do Encarregado",
       "Ativo", "Semana", "Localizacao", "Data de Inicio",
-      "Data de Termino", "Prioridade"
+      "Data de Termino", "Prioridade", "Pacote"
     ];
 
     const exampleData = [
       [
         "ACT-001", "Inspecao semanal do transportador TC-01", "Realizar inspecao visual e lubrificacao dos roletes.",
         "Mecanica", "Carlos Souza", "TC-01", "Semana 25",
-        "Area da Britagem", "2025-06-16", "2025-06-16", "high"
+        "Area da Britagem", "2025-06-16", "2025-06-16", "high", "Pacote 1"
       ],
       [
         "ACT-002", "Troca de lampadas do galpao G-03", "Substituir todas as lampadas queimadas por LED.",
         "Eletrica", "Ana Pereira", "GALPAO-G03", "Semana 25",
-        "Area de Manutencao", "2025-06-17", "2025-06-18", "medium"
+        "Area de Manutencao", "2025-06-17", "2025-06-18", "medium", "Pacote 2"
       ],
       [
         "ACT-003", "Pintura de corrimao da escada E-05", "Lixar, aplicar fundo e pintar o corrimao.",
         "Pintura", "Mariana Costa", "ESCADA-E05", "Semana 26",
-        "Predio Administrativo", "2025-06-23", "2025-06-25", "low"
+        "Predio Administrativo", "2025-06-23", "2025-06-25", "low", "Pacote 1"
       ]
     ];
 
@@ -112,6 +112,7 @@ async function handleDownloadTemplate() {
       ["Data de Inicio", "Data de inicio da atividade no formato AAAA-MM-DD (Obrigatorio)", "2025-06-16"],
       ["Data de Termino", "Data de termino da atividade no formato AAAA-MM-DD (Obrigatorio)", "2025-06-16"],
       ["Prioridade", "Nivel de prioridade da tarefa (Obrigatorio)", "Valores aceitos: low, medium, high"],
+      ["Pacote", "Pacote ao qual a atividade pertence (Obrigatorio)", "Valores aceitos: Pacote 1, Pacote 2, Pacote 3, Pacote 4, Pacote 5"],
     ];
 
     const instructionsWorksheetData = [instructionsHeaders, ...instructionsData];
@@ -237,7 +238,8 @@ async function handleUpload(req: Request, supabaseClient: any, user: any) {
         localizacao: findHeaderIndex(headers, ['Localizacao', 'Localização', 'localizacao', 'LOCALIZACAO']),
         dataInicio: findHeaderIndex(headers, ['Data de Inicio', 'Data de Início', 'data_inicio', 'DATA_INICIO']),
         dataTermino: findHeaderIndex(headers, ['Data de Termino', 'Data de Término', 'data_termino', 'DATA_TERMINO']),
-        prioridade: findHeaderIndex(headers, ['Prioridade', 'prioridade', 'PRIORIDADE'])
+        prioridade: findHeaderIndex(headers, ['Prioridade', 'prioridade', 'PRIORIDADE']),
+        pacote: findHeaderIndex(headers, ['Pacote', 'pacote', 'PACOTE'])
       }
 
       console.log('6. Mapeamento de cabeçalhos:', headerMap)
@@ -252,13 +254,14 @@ async function handleUpload(req: Request, supabaseClient: any, user: any) {
       if (headerMap.dataInicio === -1) missingRequired.push('Data de Inicio')
       if (headerMap.dataTermino === -1) missingRequired.push('Data de Termino')
       if (headerMap.prioridade === -1) missingRequired.push('Prioridade')
+      if (headerMap.pacote === -1) missingRequired.push('Pacote')
 
       if (missingRequired.length > 0) {
         console.log('❌ Campos obrigatórios não encontrados:', missingRequired)
         return new Response(JSON.stringify({
           error: 'Cabeçalhos obrigatórios não encontrados',
           debug: `Campos faltando: ${missingRequired.join(', ')}`,
-          expectedHeaders: ['ID da Atividade (opcional)', 'Titulo', 'Disciplina', 'Nome do Encarregado', 'Ativo', 'Semana', 'Data de Inicio', 'Data de Termino', 'Prioridade'],
+          expectedHeaders: ['ID da Atividade (opcional)', 'Titulo', 'Disciplina', 'Nome do Encarregado', 'Ativo', 'Semana', 'Data de Inicio', 'Data de Termino', 'Prioridade', 'Pacote'],
           foundHeaders: headers
         }), { 
           status: 400, 
@@ -291,6 +294,7 @@ async function handleUpload(req: Request, supabaseClient: any, user: any) {
           start_date: formatDate(getCellValue(row, headerMap.dataInicio)),
           end_date: formatDate(getCellValue(row, headerMap.dataTermino)),
           priority: normalizePriority(getCellValue(row, headerMap.prioridade)),
+          pacote: getCellValue(row, headerMap.pacote) || 'Pacote 1',
           project_id: '00000000-0000-0000-0000-000000000001', // Projeto padrão
           status: 'pending',
           progress: 0
@@ -331,7 +335,8 @@ async function handleUpload(req: Request, supabaseClient: any, user: any) {
         localizacao: findHeaderIndex(headers, ['Localizacao', 'Localização', 'localizacao']),
         dataInicio: findHeaderIndex(headers, ['Data de Inicio', 'Data de Início', 'data_inicio']),
         dataTermino: findHeaderIndex(headers, ['Data de Termino', 'Data de Término', 'data_termino']),
-        prioridade: findHeaderIndex(headers, ['Prioridade', 'prioridade'])
+        prioridade: findHeaderIndex(headers, ['Prioridade', 'prioridade']),
+        pacote: findHeaderIndex(headers, ['Pacote', 'pacote'])
       }
 
       for (let i = 1; i < lines.length; i++) {
@@ -351,6 +356,7 @@ async function handleUpload(req: Request, supabaseClient: any, user: any) {
           start_date: formatDate(values[headerMap.dataInicio]),
           end_date: formatDate(values[headerMap.dataTermino]),
           priority: normalizePriority(values[headerMap.prioridade]),
+          pacote: values[headerMap.pacote] || 'Pacote 1',
           project_id: '00000000-0000-0000-0000-000000000001',
           status: 'pending',
           progress: 0

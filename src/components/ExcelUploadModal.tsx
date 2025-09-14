@@ -139,14 +139,15 @@ export function ExcelUploadModal({ trigger, onSuccess }: ExcelUploadModalProps) 
               </div>
             </div>
 
-            {/* Instructions */}
+        {/* Instructions */}
             <div className="text-xs text-gray-500 dark:text-gray-400 space-y-1">
               <p><strong>Instruções:</strong></p>
               <ul className="list-disc list-inside space-y-1">
                 <li>Use o modelo Excel (.xlsx) baixado como base</li>
-                <li>Preencha todas as colunas obrigatórias</li>
+                <li>Preencha todas as colunas obrigatórias incluindo o pacote</li>
                 <li>Formatos de data: AAAA-MM-DD (ex: 2024-01-15)</li>
                 <li>Prioridade: low, medium, high</li>
+                <li>Pacote: Pacote 1, Pacote 2, Pacote 3, Pacote 4, Pacote 5</li>
                 <li>Aceita arquivos .csv, .xlsx, .xls</li>
               </ul>
             </div>
