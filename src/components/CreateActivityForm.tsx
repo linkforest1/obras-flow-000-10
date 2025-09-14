@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,8 +10,11 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import { useState, useEffect } from "react";
 import { createActivityInDB } from "@/services/activityService";
 import { useActivityInteractions } from "@/hooks/useActivityInteractions";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 interface CreateActivityFormProps {
   onSuccess: () => void;
@@ -29,6 +31,7 @@ export function CreateActivityForm({ onSuccess }: CreateActivityFormProps) {
     responsible_name: "",
     asset: "",
     week: "",
+    pacote: "",
   });
   
   const [startDate, setStartDate] = useState<Date | undefined>();
@@ -40,6 +43,28 @@ export function CreateActivityForm({ onSuccess }: CreateActivityFormProps) {
   
   const { toast } = useToast();
   const { uploadPhoto } = useActivityInteractions();
+  const { user } = useAuth();
+  const [userPacote, setUserPacote] = useState<string>("");
+
+  // Buscar o pacote do usuário logado
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      if (user) {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('pacote')
+          .eq('id', user.id)
+          .single();
+        
+        if (data && !error) {
+          setUserPacote(data.pacote);
+          setFormData(prev => ({ ...prev, pacote: data.pacote }));
+        }
+      }
+    };
+
+    fetchUserProfile();
+  }, [user]);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -116,6 +141,7 @@ export function CreateActivityForm({ onSuccess }: CreateActivityFormProps) {
         responsible_name: "",
         asset: "",
         week: "",
+        pacote: userPacote,
       });
       setStartDate(undefined);
       setEndDate(undefined);
@@ -330,6 +356,20 @@ export function CreateActivityForm({ onSuccess }: CreateActivityFormProps) {
               </PopoverContent>
             </Popover>
           </div>
+        </div>
+
+        <div>
+          <Label htmlFor="pacote">Pacote</Label>
+          <Input
+            id="pacote"
+            value={formData.pacote}
+            disabled
+            className="bg-muted"
+            placeholder="Pacote será definido automaticamente"
+          />
+          <p className="text-xs text-gray-500 mt-1">
+            O pacote é definido automaticamente com base no seu perfil
+          </p>
         </div>
 
         <div>

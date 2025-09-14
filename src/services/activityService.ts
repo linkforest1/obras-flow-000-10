@@ -14,6 +14,7 @@ export type CreateActivityData = {
     week?: string;
     employee_count?: Record<string, number>;
     custom_id?: string;
+    pacote?: string;
 };
 
 export const fetchActivitiesFromDB = async (projectId?: string) => {
@@ -56,6 +57,7 @@ export const fetchActivitiesFromDB = async (projectId?: string) => {
       location: activity.location || '',
       asset: activity.asset || '',
       week: activity.week || '',
+      pacote: activity.pacote || 'Pacote 1',
       photos: activity.photos?.length || 0,
       photoUrls: activity.photos?.map((photo: any) => photo.photo_url) || [],
       comments: activity.comments?.length || 0,
@@ -88,6 +90,7 @@ export const createActivityInDB = async (activityData: CreateActivityData) => {
       week: activityData.week,
       employee_count: activityData.employee_count || {},
       custom_id: activityData.custom_id || null,
+      pacote: activityData.pacote || 'Pacote 1',
     }])
     .select()
     .single();

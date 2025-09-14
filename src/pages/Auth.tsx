@@ -18,6 +18,7 @@ const Auth = () => {
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [role, setRole] = useState('');
+  const [pacote, setPacote] = useState('');
   const [loading, setLoading] = useState(false);
   const [resetEmail, setResetEmail] = useState('');
   const [showResetForm, setShowResetForm] = useState(false);
@@ -35,7 +36,7 @@ const Auth = () => {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !password || !fullName || !role) {
+    if (!email || !password || !fullName || !role || !pacote) {
       toast({
         title: "Erro",
         description: "Por favor, preencha todos os campos.",
@@ -53,7 +54,8 @@ const Auth = () => {
           emailRedirectTo: redirectUrl,
           data: {
             full_name: fullName,
-            role: role
+            role: role,
+            pacote: pacote
           }
         }
       });
@@ -173,6 +175,14 @@ const Auth = () => {
     value: "cliente",
     label: "Cliente"
   }];
+
+  const pacoteOptions = [
+    { value: "Pacote 1", label: "Pacote 1" },
+    { value: "Pacote 2", label: "Pacote 2" },
+    { value: "Pacote 3", label: "Pacote 3" },
+    { value: "Pacote 4", label: "Pacote 4" },
+    { value: "Pacote 5", label: "Pacote 5" },
+  ];
 
   // Escolher o ícone baseado no tema
   const logoSrc = theme === 'dark' ? "/lovable-uploads/b7e157d8-4fdf-481b-a8f1-866ca4bc3623.png" : "/lovable-uploads/eaf23cdd-0c79-48bf-a188-139350a878af.png";
@@ -351,6 +361,19 @@ const Auth = () => {
                           </SelectTrigger>
                           <SelectContent>
                             {roleOptions.map(option => <SelectItem key={option.value} value={option.value}>
+                                {option.label}
+                              </SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="pacote" className="text-foreground">Pacote</Label>
+                        <Select onValueChange={setPacote}>
+                          <SelectTrigger className="bg-input border-border text-foreground">
+                            <SelectValue placeholder="Selecione seu pacote" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {pacoteOptions.map(option => <SelectItem key={option.value} value={option.value}>
                                 {option.label}
                               </SelectItem>)}
                           </SelectContent>
