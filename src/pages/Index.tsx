@@ -73,12 +73,18 @@ const Index = () => {
       const weekEnd = endOfWeek(today, { weekStartsOn: 0 });
 
       activitiesToFilter = activitiesToFilter.filter(activity => {
-        if (!activity.startDate) return false;
         try {
-          const activityDate = parseISO(activity.startDate);
-          return activityDate >= weekStart && activityDate <= weekEnd;
+          const hasStart = !!activity.startDate;
+          const hasEnd = !!activity.endDate;
+          if (!hasStart && !hasEnd) return false;
+
+          const start = hasStart ? parseISO(activity.startDate) : null;
+          const end = hasEnd ? parseISO(activity.endDate) : start;
+
+          // Intersects current week if it starts before weekEnd and ends after weekStart
+          return (start && start <= weekEnd) && (end && end >= weekStart);
         } catch (error) {
-          console.error("Invalid date format for activity:", activity.id, activity.startDate);
+          console.error("Invalid date format for activity:", activity.id, activity.startDate, activity.endDate);
           return false;
         }
       });
