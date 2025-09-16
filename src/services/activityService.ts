@@ -18,6 +18,19 @@ export type CreateActivityData = {
 };
 
 export const fetchActivitiesFromDB = async (projectId?: string) => {
+  // Primeiro, vamos verificar o pacote do usuário atual
+  const { data: userProfile, error: profileError } = await supabase
+    .from('profiles')
+    .select('pacote')
+    .eq('id', (await supabase.auth.getUser()).data.user?.id)
+    .single();
+
+  if (profileError) {
+    console.error('Erro ao buscar perfil do usuário:', profileError);
+  } else {
+    console.log('Pacote do usuário logado:', userProfile?.pacote);
+  }
+
   let query = supabase
     .from('activities')
     .select(`
@@ -36,7 +49,8 @@ export const fetchActivitiesFromDB = async (projectId?: string) => {
 
   if (error) throw error;
 
-  console.log('Raw data from database:', data);
+  console.log('Raw data from database (should be filtered by RLS):', data);
+  console.log('Number of activities returned:', data?.length || 0);
 
   const transformedData = (data || []).map(activity => {
     console.log('Processing activity:', activity.id, 'responsible_name:', activity.responsible_name, 'custom_id:', activity.custom_id);
