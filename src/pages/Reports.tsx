@@ -48,16 +48,49 @@ export default function Reports() {
     }
   };
 
-  const handleExportPDF = async () => {
+  const handleExportPDF = async (filters?: any) => {
     console.log('Iniciando exportação com dados:', {
       activitiesCount: activities?.length,
-      selectedWeek
+      selectedWeek,
+      filters
     });
 
-    // Filtrar atividades baseado na semana selecionada
-    const filteredActivities = selectedWeek === 'all' 
-      ? activities || []
-      : (activities || []).filter(activity => String(activity.week) === selectedWeek);
+    // Aplicar todos os filtros (semana + disciplina + outros)
+    let filteredActivities = activities || [];
+    
+    // Filtrar por semana se selecionada
+    if (selectedWeek !== 'all') {
+      filteredActivities = filteredActivities.filter(activity => String(activity.week) === selectedWeek);
+    }
+    
+    // Aplicar filtros adicionais se fornecidos
+    if (filters) {
+      if (filters.discipline && filters.discipline.length > 0) {
+        filteredActivities = filteredActivities.filter(activity => 
+          filters.discipline.includes(activity.discipline || '')
+        );
+      }
+      if (filters.status && filters.status.length > 0) {
+        filteredActivities = filteredActivities.filter(activity => 
+          filters.status.includes(activity.status)
+        );
+      }
+      if (filters.asset && filters.asset.length > 0) {
+        filteredActivities = filteredActivities.filter(activity => 
+          filters.asset.includes(activity.asset || '')
+        );
+      }
+      if (filters.responsible && filters.responsible.length > 0) {
+        filteredActivities = filteredActivities.filter(activity => 
+          filters.responsible.includes(activity.responsible_name || '')
+        );
+      }
+      if (filters.location && filters.location.length > 0) {
+        filteredActivities = filteredActivities.filter(activity => 
+          filters.location.includes(activity.location || '')
+        );
+      }
+    }
 
     // Filtrar desvios baseado na semana selecionada (se necessário)
     const filteredReports = reports || [];
@@ -68,9 +101,12 @@ export default function Reports() {
       totalDeviations: getDeviationStats(filteredReports).total
     };
 
+    const filterSuffix = filters?.discipline?.length > 0 ? `-disciplina-${filters.discipline.join('-')}` : '';
+    const filename = `relatorio-gerencial-${selectedWeek === 'all' ? 'completo' : `semana-${selectedWeek}`}${filterSuffix}`;
+
     await exportToPDF(
       null, 
-      `relatorio-gerencial-${selectedWeek === 'all' ? 'completo' : `semana-${selectedWeek}`}`, 
+      filename, 
       selectedWeek, 
       filteredActivities, 
       rdoData
@@ -166,6 +202,10 @@ function ReportsContent({ selectedWeek, setSelectedWeek, handleExportPDF, handle
     setFilters(newFilters);
   };
 
+  const handleExportWithFilters = () => {
+    handleExportPDF(filters);
+  };
+
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-background">
@@ -174,7 +214,7 @@ function ReportsContent({ selectedWeek, setSelectedWeek, handleExportPDF, handle
           <ReportsHeader 
             selectedWeek={selectedWeek} 
             onWeekChange={setSelectedWeek} 
-            onExportPDF={handleExportPDF} 
+            onExportPDF={handleExportWithFilters} 
             onSignOut={handleSignOut} 
             isExporting={isExporting} 
           />
