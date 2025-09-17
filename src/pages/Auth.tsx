@@ -12,6 +12,13 @@ import { useNavigate } from 'react-router-dom';
 import { Loader2, CheckCircle2, Clock, BarChart3, Users } from 'lucide-react';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { useTheme } from '@/contexts/ThemeContext';
+import { 
+  validateEmail, 
+  validatePassword, 
+  checkAuthRateLimit, 
+  resetAuthRateLimit, 
+  sanitizeInput 
+} from '@/utils/security';
 
 const Auth = () => {
   const [email, setEmail] = useState('');
@@ -36,6 +43,8 @@ const Auth = () => {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Input validation
     if (!email || !password || !fullName || !role || !pacote) {
       toast({
         title: "Erro",
@@ -44,23 +53,67 @@ const Auth = () => {
       });
       return;
     }
+
+    // Sanitize inputs
+    const sanitizedEmail = sanitizeInput(email).toLowerCase();
+    const sanitizedFullName = sanitizeInput(fullName);
+    const sanitizedRole = sanitizeInput(role);
+    const sanitizedPacote = sanitizeInput(pacote);
+    
+    // Validate email
+    if (!validateEmail(sanitizedEmail)) {
+      toast({
+        title: "Erro",
+        description: "Por favor, digite um e-mail válido.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Validate password strength
+    const passwordValidation = validatePassword(password);
+    if (!passwordValidation.isValid) {
+      toast({
+        title: "Senha fraca",
+        description: passwordValidation.message,
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Rate limiting check
+    const rateCheck = checkAuthRateLimit(sanitizedEmail);
+    if (!rateCheck.allowed) {
+      toast({
+        title: "Muitas tentativas",
+        description: "Aguarde 15 minutos antes de tentar novamente.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setLoading(true);
     try {
       const redirectUrl = `${window.location.origin}/`;
       const { data, error } = await supabase.auth.signUp({
-        email,
+        email: sanitizedEmail,
         password,
         options: {
           emailRedirectTo: redirectUrl,
           data: {
-            full_name: fullName,
-            role: role,
-            pacote: pacote
+            full_name: sanitizedFullName,
+            role: sanitizedRole,
+            pacote: sanitizedPacote
           }
         }
       });
+      
       if (error) throw error;
+      
       if (data.user) {
+        // Reset rate limit on successful signup
+        resetAuthRateLimit(sanitizedEmail);
+        
         toast({
           title: "Cadastro realizado!",
           description: "Verifique seu e-mail para confirmar a conta."
@@ -79,6 +132,8 @@ const Auth = () => {
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Input validation
     if (!email || !password) {
       toast({
         title: "Erro",
@@ -87,14 +142,44 @@ const Auth = () => {
       });
       return;
     }
+
+    // Sanitize inputs
+    const sanitizedEmail = sanitizeInput(email).toLowerCase();
+    
+    // Validate email format
+    if (!validateEmail(sanitizedEmail)) {
+      toast({
+        title: "Erro",
+        description: "Por favor, digite um e-mail válido.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Rate limiting check
+    const rateCheck = checkAuthRateLimit(sanitizedEmail);
+    if (!rateCheck.allowed) {
+      toast({
+        title: "Muitas tentativas",
+        description: "Aguarde 15 minutos antes de tentar novamente.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setLoading(true);
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
-        email,
+        email: sanitizedEmail,
         password
       });
+      
       if (error) throw error;
+      
       if (data.user) {
+        // Reset rate limit on successful login
+        resetAuthRateLimit(sanitizedEmail);
+        
         toast({
           title: "Login realizado!",
           description: "Bem-vindo de volta!"
@@ -102,9 +187,14 @@ const Auth = () => {
         window.location.href = '/';
       }
     } catch (error: any) {
+      const remainingAttempts = rateCheck.remainingAttempts;
+      const message = remainingAttempts !== undefined && remainingAttempts > 0
+        ? `Credenciais inválidas. ${remainingAttempts} tentativas restantes.`
+        : error.message || "Credenciais inválidas. Tente novamente.";
+        
       toast({
         title: "Erro no login",
-        description: error.message || "Credenciais inválidas. Tente novamente.",
+        description: message,
         variant: "destructive"
       });
     } finally {

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { validateFileUpload, sanitizeFileName, sanitizeContent } from '@/utils/security';
 
 export const useActivityInteractions = () => {
   const { user } = useAuth();
@@ -18,11 +19,24 @@ export const useActivityInteractions = () => {
       return null;
     }
 
+    // Validate file security
+    const fileValidation = validateFileUpload(file);
+    if (!fileValidation.isValid) {
+      toast({
+        title: "Arquivo inválido",
+        description: fileValidation.message,
+        variant: "destructive",
+      });
+      return null;
+    }
+
     setUploading(true);
     try {
-      // Upload file to storage
+      // Sanitize file name and caption
       const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}/${activityId}/${Date.now()}.${fileExt}`;
+      const sanitizedFileName = sanitizeFileName(`${Date.now()}.${fileExt}`);
+      const fileName = `${user.id}/${activityId}/${sanitizedFileName}`;
+      const sanitizedCaption = caption ? sanitizeContent(caption) : null;
       
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('activity-photos')
@@ -42,7 +56,7 @@ export const useActivityInteractions = () => {
           activity_id: activityId,
           user_id: user.id,
           photo_url: publicUrl,
-          caption: caption || null,
+          caption: sanitizedCaption,
         }])
         .select()
         .single();
@@ -78,13 +92,24 @@ export const useActivityInteractions = () => {
       return null;
     }
 
+    // Sanitize comment text
+    const sanitizedComment = sanitizeContent(commentText);
+    if (!sanitizedComment.trim()) {
+      toast({
+        title: "Erro",
+        description: "Comentário não pode estar vazio.",
+        variant: "destructive",
+      });
+      return null;
+    }
+
     try {
       const { data, error } = await supabase
         .from('activity_comments')
         .insert([{
           activity_id: activityId,
           user_id: user.id,
-          comment_text: commentText,
+          comment_text: sanitizedComment,
         }])
         .select()
         .single();

@@ -19,6 +19,7 @@ import { CommentModal } from "./CommentModal";
 import { EmployeeCountModal } from "./EmployeeCountModal";
 import { downloadActivityImages } from "@/utils/downloadUtils";
 import { useQueryClient } from "@tanstack/react-query";
+import { safeString } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { statusConfig, priorityConfig } from "@/config/activity";
 

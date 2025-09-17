@@ -7,6 +7,8 @@ import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Upload, FileSpreadsheet, Download } from "lucide-react";
 import { useExcelActivities } from "@/hooks/useExcelActivities";
+import { validateFileUpload } from '@/utils/security';
+import { useToast } from '@/hooks/use-toast';
 
 interface ExcelUploadModalProps {
   trigger?: React.ReactNode;
@@ -18,10 +20,25 @@ export function ExcelUploadModal({ trigger, onSuccess }: ExcelUploadModalProps) 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { downloadTemplate, uploadFile, isDownloading, isUploading } = useExcelActivities();
+  const { toast } = useToast();
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      // Validate file security
+      const validation = validateFileUpload(file);
+      if (!validation.isValid) {
+        toast({
+          title: "Arquivo inválido",
+          description: validation.message,
+          variant: "destructive"
+        });
+        // Clear the input
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+        return;
+      }
       setSelectedFile(file);
     }
   };

@@ -7,6 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Upload, X } from "lucide-react";
 import { useActivityInteractions } from "@/hooks/useActivityInteractions";
+import { validateFileUpload } from '@/utils/security';
+import { useToast } from '@/hooks/use-toast';
 
 interface PhotoUploadModalProps {
   open: boolean;
@@ -20,10 +22,32 @@ export function PhotoUploadModal({ open, onClose, activityId, activityTitle }: P
   const [caption, setCaption] = useState('');
   const [preview, setPreview] = useState<string | null>(null);
   const { uploadPhoto, uploading } = useActivityInteractions();
+  const { toast } = useToast();
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      // Validate file security
+      const validation = validateFileUpload(file);
+      if (!validation.isValid) {
+        toast({
+          title: "Arquivo inválido",
+          description: validation.message,
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Additional check for images only in photo upload
+      if (!file.type.startsWith('image/')) {
+        toast({
+          title: "Arquivo inválido",
+          description: "Apenas imagens são permitidas neste upload.",
+          variant: "destructive"
+        });
+        return;
+      }
+
       setSelectedFile(file);
       const reader = new FileReader();
       reader.onload = () => setPreview(reader.result as string);
