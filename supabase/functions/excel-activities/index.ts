@@ -153,6 +153,29 @@ async function handleUpload(req: Request, supabaseClient: any, user: any) {
   console.log('🔍 INICIANDO PROCESSAMENTO DO UPLOAD...')
   
   try {
+    // 0. Buscar perfil do usuário para obter pacote e role
+    const { data: profile, error: profileError } = await supabaseClient
+      .from('profiles')
+      .select('pacote, role')
+      .eq('id', user.id)
+      .maybeSingle()
+
+    if (profileError || !profile) {
+      console.log('❌ Perfil não encontrado ou erro ao buscar:', profileError)
+      return new Response(JSON.stringify({ 
+        error: 'Não foi possível identificar o pacote do usuário',
+        debug: profileError?.message || 'Perfil ausente'
+      }), { 
+        status: 400, 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      })
+    }
+
+    const userPacote = profile.pacote || 'Pacote 1'
+    const userRole = profile.role || 'fiscal'
+
+    console.log('Perfil do usuário para importação:', { role: userRole, pacote: userPacote })
+
     console.log('1. Extraindo arquivo do FormData...')
     const formData = await req.formData()
     const file = formData.get('file') as File
@@ -294,7 +317,7 @@ async function handleUpload(req: Request, supabaseClient: any, user: any) {
           start_date: formatDate(getCellValue(row, headerMap.dataInicio)),
           end_date: formatDate(getCellValue(row, headerMap.dataTermino)),
           priority: normalizePriority(getCellValue(row, headerMap.prioridade)),
-          pacote: getCellValue(row, headerMap.pacote) || 'Pacote 1',
+          pacote: userPacote,
           project_id: '00000000-0000-0000-0000-000000000001', // Projeto padrão
           status: 'pending',
           progress: 0
@@ -356,7 +379,7 @@ async function handleUpload(req: Request, supabaseClient: any, user: any) {
           start_date: formatDate(values[headerMap.dataInicio]),
           end_date: formatDate(values[headerMap.dataTermino]),
           priority: normalizePriority(values[headerMap.prioridade]),
-          pacote: values[headerMap.pacote] || 'Pacote 1',
+          pacote: userPacote,
           project_id: '00000000-0000-0000-0000-000000000001',
           status: 'pending',
           progress: 0
@@ -385,8 +408,16 @@ async function handleUpload(req: Request, supabaseClient: any, user: any) {
     }
 
     console.log('9. Inserindo no banco de dados...')
-    // Inserir atividades no banco
-    const { data, error } = await supabaseClient
+    // Forçar pacote do usuário em todas as atividades
+    activities = activities.map(a => ({ ...a, pacote: userPacote }));
+
+    // Usar a service role key para inserir, garantindo cumprimento das regras de negócio acima
+    const supabaseAdmin = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+    )
+
+    const { data, error } = await supabaseAdmin
       .from('activities')
       .insert(activities)
       .select()
