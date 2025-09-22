@@ -17,10 +17,13 @@ export const useExcelActivities = () => {
         throw new Error('Usuário não autenticado');
       }
 
-      // Usar a URL correta do projeto Supabase
+      // Usar a URL correta do projeto Supabase com função específica
       const supabaseUrl = 'https://ihxvtltuqsnasxdkmbhz.supabase.co';
+      const functionUrl = `${supabaseUrl}/functions/v1/excel-activities/download-template`;
       
-      const response = await fetch(`${supabaseUrl}/functions/v1/excel-activities/download-template`, {
+      console.log('🔗 Fazendo request para:', functionUrl);
+      
+      const response = await fetch(functionUrl, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${session.access_token}`,
@@ -116,6 +119,13 @@ export const useExcelActivities = () => {
       const supabaseUrl = 'https://ihxvtltuqsnasxdkmbhz.supabase.co';
       const uploadUrl = `${supabaseUrl}/functions/v1/excel-activities/upload`;
       console.log('URL do upload:', uploadUrl);
+
+      console.log('6. Dados sendo enviados:', {
+        fileName: file.name,
+        fileSize: file.size,
+        fileType: file.type,
+        hasValidToken: !!session.access_token
+      });
 
       const response = await fetch(uploadUrl, {
         method: 'POST',

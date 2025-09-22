@@ -63,7 +63,11 @@ export const validateFileUpload = (file: File): { isValid: boolean; message?: st
     return { isValid: false, message: 'Arquivo muito grande. Máximo 10MB permitido.' };
   }
 
-  // Check file type
+  // Check file type - more flexible for Excel files
+  const filename = file.name.toLowerCase();
+  const fileExtension = filename.substring(filename.lastIndexOf('.'));
+  
+  const allowedExtensions = ['.jpg', '.jpeg', '.png', '.webp', '.gif', '.pdf', '.xlsx', '.xls', '.csv'];
   const allowedTypes = [
     'image/jpeg',
     'image/jpg', 
@@ -73,18 +77,30 @@ export const validateFileUpload = (file: File): { isValid: boolean; message?: st
     'application/pdf',
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // xlsx
     'application/vnd.ms-excel', // xls
-    'text/csv'
+    'text/csv',
+    'application/octet-stream', // Sometimes Excel files are detected as this
+    'application/zip' // xlsx files are actually zip containers
   ];
   
-  if (!allowedTypes.includes(file.type)) {
+  // Check by file extension first (more reliable for Excel files)
+  if (!allowedExtensions.includes(fileExtension)) {
+    return { 
+      isValid: false, 
+      message: `Tipo de arquivo não permitido: ${fileExtension}. Use apenas: ${allowedExtensions.join(', ')}` 
+    };
+  }
+  
+  // For Excel/CSV files, be more lenient with MIME type detection
+  if (['.xlsx', '.xls', '.csv'].includes(fileExtension)) {
+    // Allow Excel files regardless of detected MIME type as browsers can be inconsistent
+  } else if (!allowedTypes.includes(file.type)) {
     return { 
       isValid: false, 
       message: 'Tipo de arquivo não permitido. Use apenas imagens, PDFs ou planilhas.' 
     };
   }
 
-  // Check file name for suspicious patterns
-  const filename = file.name.toLowerCase();
+  // Check file name for suspicious patterns (filename already declared above)
   if (filename.includes('..') || filename.includes('/') || filename.includes('\\')) {
     return { isValid: false, message: 'Nome do arquivo contém caracteres não permitidos.' };
   }
