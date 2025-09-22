@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Calendar, MapPin, User, Camera, MessageCircle, CheckCircle2, Image, MessageSquare, Settings, Trash2, Plus, XCircle, Clock, Package, Users, Download, RotateCcw, Edit } from "lucide-react";
+import { Calendar, MapPin, User, Camera, MessageCircle, CheckCircle2, Image, MessageSquare, Settings, Trash2, Plus, XCircle, Clock, Package, Users, Download, RotateCcw, Edit, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
@@ -22,6 +22,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { safeString } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { statusConfig, priorityConfig } from "@/config/activity";
+import { useActivityDeviation } from "@/hooks/useActivityDeviation";
 
 interface ActivityCardProps {
   id: string;
@@ -129,6 +130,9 @@ export function ActivityCard({
     refetch: refetchPhotos
   } = useActivityPhotos(id);
   const actualPhotosCount = activityPhotos?.length || 0;
+
+  // Verificar se a atividade tem desvios associados
+  const { data: hasDeviation, isLoading: isLoadingDeviation } = useActivityDeviation(id);
   const formattedStartDate = startDate ? new Date(startDate + 'T00:00:00').toLocaleDateString('pt-BR') : '';
   const formattedEndDate = endDate ? new Date(endDate + 'T00:00:00').toLocaleDateString('pt-BR') : '';
 
@@ -364,10 +368,24 @@ export function ActivityCard({
 
               <CardHeader className="pb-3 p-4 md:p-6 pr-12">
                 <div className="space-y-3">
-                  {/* Título no topo */}
-                  <h3 className="font-bold text-lg md:text-xl text-foreground leading-tight mx-0 py-[10px]">
-                    {title}
-                  </h3>
+                   {/* Título no topo */}
+                   <div className="flex items-center gap-2">
+                     <h3 className="font-bold text-lg md:text-xl text-foreground leading-tight mx-0 py-[10px] flex-1">
+                       {title}
+                     </h3>
+                     {hasDeviation && (
+                       <Tooltip>
+                         <TooltipTrigger asChild>
+                           <div className="flex items-center justify-center w-8 h-8 rounded-full bg-red-100 dark:bg-red-900/20">
+                             <AlertTriangle className="w-4 h-4 text-red-600 dark:text-red-400" />
+                           </div>
+                         </TooltipTrigger>
+                         <TooltipContent>
+                           <p>Esta atividade possui desvios reportados</p>
+                         </TooltipContent>
+                       </Tooltip>
+                     )}
+                   </div>
                   
                   {/* Status, Prioridade e Progresso logo abaixo */}
                   <div className="flex flex-wrap items-center gap-2">
