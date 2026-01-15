@@ -210,6 +210,44 @@ export type Database = {
           },
         ]
       }
+      activity_progress_history: {
+        Row: {
+          activity_id: string
+          changed_at: string
+          changed_by: string
+          id: string
+          new_progress: number
+          old_progress: number | null
+          pacote: string
+        }
+        Insert: {
+          activity_id: string
+          changed_at?: string
+          changed_by: string
+          id?: string
+          new_progress: number
+          old_progress?: number | null
+          pacote?: string
+        }
+        Update: {
+          activity_id?: string
+          changed_at?: string
+          changed_by?: string
+          id?: string
+          new_progress?: number
+          old_progress?: number | null
+          pacote?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activity_progress_history_activity_id_fkey"
+            columns: ["activity_id"]
+            isOneToOne: false
+            referencedRelation: "activities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       activity_subtasks: {
         Row: {
           activity_id: string
@@ -639,50 +677,6 @@ export type Database = {
           },
         ]
       }
-      scope_changes: {
-        Row: {
-          activity_id: string
-          approved_by: string | null
-          change_description: string
-          id: string
-          justification: string | null
-          requested_at: string
-          requested_by: string
-          reviewed_at: string | null
-          status: string | null
-        }
-        Insert: {
-          activity_id: string
-          approved_by?: string | null
-          change_description: string
-          id?: string
-          justification?: string | null
-          requested_at?: string
-          requested_by: string
-          reviewed_at?: string | null
-          status?: string | null
-        }
-        Update: {
-          activity_id?: string
-          approved_by?: string | null
-          change_description?: string
-          id?: string
-          justification?: string | null
-          requested_at?: string
-          requested_by?: string
-          reviewed_at?: string | null
-          status?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "scope_changes_activity_id_fkey"
-            columns: ["activity_id"]
-            isOneToOne: false
-            referencedRelation: "activities"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       tasks: {
         Row: {
           created_at: string
@@ -810,22 +804,51 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      get_current_user_pacote: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
-      get_current_user_role: {
-        Args: Record<PropertyKey, never>
-        Returns: string
+      get_current_user_pacote: { Args: never; Returns: string }
+      get_current_user_role: { Args: never; Returns: string }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
       }
     }
     Enums: {
-      [_ in never]: never
+      app_role:
+        | "admin"
+        | "gestor"
+        | "gestor_disciplina"
+        | "engenheiro"
+        | "encarregado"
+        | "fiscal"
+        | "cliente"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -952,6 +975,16 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: [
+        "admin",
+        "gestor",
+        "gestor_disciplina",
+        "engenheiro",
+        "encarregado",
+        "fiscal",
+        "cliente",
+      ],
+    },
   },
 } as const
