@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Calendar, MapPin, User, Camera, MessageCircle, CheckCircle2, Image, MessageSquare, Settings, Trash2, Plus, XCircle, Clock, Package, Users, Download, RotateCcw, Edit, AlertTriangle } from "lucide-react";
+import { Calendar, MapPin, User, Camera, MessageCircle, CheckCircle2, Image, MessageSquare, Settings, Trash2, Plus, XCircle, Clock, Package, Users, Download, RotateCcw, Edit, AlertTriangle, ExternalLink } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
@@ -89,6 +90,7 @@ export function ActivityCard({
   const {
     toast
   } = useToast();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const [currentProgress, setCurrentProgress] = useState(progress);
@@ -624,6 +626,20 @@ export function ActivityCard({
                     </TooltipTrigger>
                     <TooltipContent>
                       <p>Adicionar comentário</p>
+                    </TooltipContent>
+                  </Tooltip>
+
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button onClick={e => {
+                        e.stopPropagation();
+                        navigate(`/atividades?activity=${id}`);
+                      }} variant="outline" size="sm" className="h-10 w-10 p-0">
+                        <ExternalLink className="w-5 h-5" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Ir para detalhes</p>
                     </TooltipContent>
                   </Tooltip>
                 </div>
