@@ -13,6 +13,8 @@ import { FilteredActivityProgressChart } from "@/components/FilteredActivityProg
 import { WeeklyActivitiesTable } from "@/components/WeeklyActivitiesTable";
 import { FilteredDisciplineDistributionChart } from "@/components/FilteredDisciplineDistributionChart";
 import { IssuesCards } from "@/components/IssuesCards";
+import { ActivityContributionCalendar } from "@/components/Reports/ActivityContributionCalendar";
+import { WeeklySummaryAI } from "@/components/Reports/WeeklySummaryAI";
 
 import { usePDFExport } from "@/hooks/usePDFExport";
 import { useActivities } from "@/hooks/useActivities";
@@ -331,19 +333,8 @@ function ReportsContent({ selectedWeeks, selectedDisciplines, selectedLocations,
                 </TabsContent>
 
                 <TabsContent value="performance" className="space-y-6">
-                  <FilteredMetricsCards selectedWeeks={selectedWeeks} selectedDisciplines={selectedDisciplines} selectedLocations={selectedLocations} />
-                  
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Indicadores de Performance</CardTitle>
-                      <CardDescription>
-                        Métricas detalhadas de produtividade
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <FilteredActivityProgressChart selectedWeeks={selectedWeeks} selectedDisciplines={selectedDisciplines} selectedLocations={selectedLocations} />
-                    </CardContent>
-                  </Card>
+                  <ActivityContributionCalendar />
+                  <WeeklySummaryAI />
                 </TabsContent>
 
                 <TabsContent value="rdo" className="space-y-6">
