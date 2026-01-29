@@ -25,9 +25,9 @@ serve(async (req) => {
       throw new Error('Mensagens inválidas');
     }
     
-    // Validate message content
+    // Validate message content - allow up to 50000 chars for AI summary prompts
     const lastMessage = messages[messages.length - 1];
-    if (!lastMessage.content || typeof lastMessage.content !== 'string' || lastMessage.content.length > 1000) {
+    if (!lastMessage.content || typeof lastMessage.content !== 'string' || lastMessage.content.length > 50000) {
       throw new Error('Conteúdo da mensagem inválido ou muito longo');
     }
     
